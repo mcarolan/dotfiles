@@ -39,5 +39,6 @@ alias ls='ls -lhart'
          fi
     }
 
-
-
+if [[ ! $TERM =~ screen ]]; then
+    exec tmux
+fi
