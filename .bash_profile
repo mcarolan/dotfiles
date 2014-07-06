@@ -38,7 +38,7 @@ alias ls='ls -lhart'
              echo "'$1' is not a valid file"
          fi
     }
-
+export DOCKER_HOST=tcp://localhost:2375
 if [[ ! $TERM =~ screen ]]; then
     exec tmux
 fi
