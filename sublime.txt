@@ -1,0 +1,23 @@
+Sublime command line - http://www.sublimetext.com/docs/3/osx_command_line.html
+
+Packages:
+Package Control https://sublime.wbond.net/
+Git
+Synced Sidebar
+Vintageous
+GitGutter
+
+User settings:
+{
+    "bold_folder_labels": true,
+    "caret_style": "phase",
+    "color_scheme": "Packages/Color Scheme - Default/iPlastic.tmTheme",
+    "fade_fold_buttons": false,
+    "highlight_line": true,
+    "ignored_packages":
+    [
+        "Vintage"
+    ],
+    "line_padding_bottom": 1,
+    "line_padding_top": 1
+}
