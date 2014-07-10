@@ -6,6 +6,8 @@ Git
 Synced Sidebar
 Vintageous
 GitGutter
+WordHighlight
+SideBarEnhancements
 
 User settings:
 {
