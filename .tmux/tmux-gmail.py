@@ -6,6 +6,7 @@ tmux-formatted string displaying the total unread message count.
 import imaplib
 import re
 import sys
+import email
 
 # The approach of parsing the credentials off of a configuration file might
 # seem a little constipated, but I prefer not to give my password as an
@@ -32,33 +33,49 @@ def get_credentials(muttrc_path):
         sys.stderr.write("Unable to open muttrc file.\n")
         sys.exit(1)
 
-def get_unread_count(server, username, password):
+def get_unread_and_subject(server, username, password):
     try:
         c = imaplib.IMAP4_SSL(*server)
         c.login(username, password)
-        c.select(readonly=1)
+        exists = c.select('INBOX', readonly=1)[1][0]
+        typ, msgData = c.fetch(str(exists), "(RFC822)")
+        
+        subject = ""
+        for response_part in msgData:
+          if isinstance(response_part, tuple):
+            msg = email.message_from_string(response_part[1])
+            subject = msg["subject"]
         (code, messages) = c.search('utf-8', 'UNSEEN')
         c.close()
         c.logout()
-        if not len(messages):
-            return 0
-        return len(messages[0].split())
+
+        numberUnread = 0
+
+        if len(messages):
+          numberUnread = len(messages[0].split())
+
+        return (numberUnread, subject)
     except imaplib.IMAP4.error, e:
         sys.stderr.write("%s\n" % e.message)
         sys.exit(1)
 
-def tmux_format(count):
+def tmux_format(unreadAndSubject, maximumLengthOfSubject):
     """Return message `count` formatted for use in the tmux statsubar."""
-    return str(count)
+    subject = unreadAndSubject[1]
+
+    if len(subject) > maximumLengthOfSubject:
+      subject = subject[:maximumLengthOfSubject].strip() + "..."
+
+    return str(unreadAndSubject[0]) + ": " + subject
 
 if __name__ == '__main__':
-    if not len(sys.argv) > 1:
-        sys.stderr.write("Usage: %s <path to .muttrc>\n" % sys.argv[0])
+    if not len(sys.argv) == 3:
+        sys.stderr.write("Usage: %s <path to .muttrc> <maximum length of subject>\n" % sys.argv[0])
         sys.exit(1)
 
-    (username, password) = get_credentials(' '.join(sys.argv[1:]))
+    (username, password) = get_credentials(sys.argv[1])
     # Hardcoded to gmail as .. that is what I use and I do not keep the
     # host-part in my regular .muttrc.
-    count = get_unread_count(('imap.gmail.com', 993), username, password)
-    print tmux_format(count)
+    unreadAndSubject = get_unread_and_subject(('imap.gmail.com', 993), username, password)
+    print tmux_format(unreadAndSubject, int(sys.argv[2]))
     sys.exit(0)
