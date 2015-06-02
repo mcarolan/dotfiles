@@ -42,3 +42,6 @@ export DOCKER_HOST=tcp://localhost:2375
 if [[ ! $TERM =~ screen ]]; then
     exec tmux
 fi
+
+alias fucking=sudo
+alias doit="!!"
